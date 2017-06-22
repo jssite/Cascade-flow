@@ -1,0 +1,116 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<title>瀑布流</title>
+<style>
+* {margin: 0; padding: 0;}
+#container {border: 1px solid red; position: relative; margin: 50px auto 0; }
+#container img { position: absolute; }
+#loader { width: 100%; height: 60px; background: url('loader.gif') no-repeat center #FFF; position: fixed; bottom: 0; left: 0; display: none; }
+</style>
+<script src="js/jquery-1.9.1.min.js"></script>
+<script>
+$(function(){
+	var oContainer=$('#container');
+	var iWidth=200;
+	var iSpace=10;
+	var iOuterWidth=iWidth+iSpace;
+	var iCells=0;
+	var arrT=[];
+	var arrL=[];
+	var iPage=0;
+	var bStop=true;
+	var sUrl='http://www.wookmark.com/api/json/popular?callback=?';
+	//获取瀑布流的列数
+	function setCells()
+	{
+		iCells=Math.floor($(window).innerWidth()/iOuterWidth);
+		oContainer.css('width',iCells*iOuterWidth-10);
+	}
+	setCells();
+
+	//获取定位的数值
+	for(var i=0; i<iCells; i++)
+	{
+		arrL[i]=i*iOuterWidth;
+		arrT[i]=0;
+	}
+
+	//获取top和left的最小值
+	function getMin()
+	{
+		var v=arrT[0];
+		var index=0;
+		for(var i=0; i<arrT.length; i++)
+		{
+			if(arrT[i]<v)
+			{
+				v=arrT[i];
+				index=i;
+			}
+		}
+		return index;
+	}
+
+	//获取数据
+	function getData()
+	{
+		if(bStop)
+		{
+			bStop=false;
+			iPage++;
+			$.getJSON(sUrl, 'page='+iPage, function(data){
+				$('#loader').show();
+				$.each(data,function(i, obj)
+				{
+					var oImg=$('<img />');
+					var iMinIndex=getMin();
+					var iHeight=iWidth/obj.width*obj.height;
+					oImg.attr('src',obj.preview);
+					oImg.css({
+						'left':arrL[iMinIndex],
+						'top':arrT[iMinIndex],
+						'width':iWidth,
+						'height':iHeight
+					})
+					arrT[iMinIndex]+=iHeight+10;
+
+					oContainer.append(oImg);
+					setTimeout(function(){
+						$('#loader').hide();
+					},1000);
+					var objImg=new Image();
+					objImg.load=function()
+					{
+						oImg.attr('src',this.src);
+					}
+					objImg.src=obj.preview;
+					bStop=true;
+				})
+			})
+		}
+		
+	}
+	getData();
+	$(window).on('scroll',function()
+	{
+		var iH=$(window).innerHeight()+$(window).scrollTop();
+		var iMinIndex=getMin();
+		if(arrT[iMinIndex]<iH)
+		{
+			getData();
+		}
+	})
+
+})
+</script>
+
+</head>
+
+<body>
+	<div id="container"></div>
+    <div id="loader"></div>
+</body>
+</html>
