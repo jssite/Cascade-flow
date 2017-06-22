@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>瀑布流</title>
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<style type="text/css">
+	*{
+		padding: 0; 
+		margin: 0;
+	}
+	#container{
+		position: relative;
+		margin: 20px auto;
+	}
+	#container .box{
+		padding: 0 10px 10px 0;
+		float: left;
+	}
+	#container .item{
+		padding: 10px;
+		border: 1px solid #ccc;
+		box-shadow: #ccc 0 0 2px;
+	}
+
+</style>
+</head>
+<body>
+<div id="container">
+	<div class="box">
+		<div class="item"><img src="images/0.jpg"></div>
+	</div>
+	<div class="box">
+		<div class="item"><img src="images/2.jpg"></div>
+	</div>
+	<div class="box">
+		<div class="item"><img src="images/1.jpg"></div>
+	</div>
+	<div class="box">
+		<div class="item"><img src="images/3.jpg"></div>
+	</div>
+	<div class="box">
+		<div class="item"><img src="images/4.jpg"></div>
+	</div>
+	<div class="box">
+		<div class="item"><img src="images/5.jpg"></div>
+	</div>
+	<div class="box">
+		<div class="item"><img src="images/6.jpg"></div>
+	</div>
+	<div class="box">
+		<div class="item"><img src="images/7.jpg"></div>
+	</div>
+	<div class="box">
+		<div class="item"><img src="images/8.jpg"></div>
+	</div>
+	<div class="box">
+		<div class="item"><img src="images/9.jpg"></div>
+	</div>
+	<div class="box">
+		<div class="item"><img src="images/10.jpg"></div>
+	</div>
+	<div class="box">
+		<div class="item"><img src="images/11.jpg"></div>
+	</div>
+	<div class="box">
+		<div class="item"><img src="images/12.jpg"></div>
+	</div>
+	<div class="box">
+		<div class="item"><img src="images/13.jpg"></div>
+	</div>
+	<div class="box">
+		<div class="item"><img src="images/14.jpg"></div>
+	</div>
+	<div class="box">
+		<div class="item"><img src="images/15.jpg"></div>
+	</div>
+</div>
+<script type="text/javascript">
+	window.onload = function(){
+		waterFull('container','box');
+		window.onscroll = function(){
+			if(checkScroll()){
+				console.log('加载数据......');
+			}
+		}
+	}
+
+	function waterFull(parent, child){
+		var oParent = document.getElementById(parent);
+		var oBox = getByClass(oParent,'box');
+		var aBoxW = oBox[0].offsetWidth;
+		var col = Math.floor(document.documentElement.clientWidth / aBoxW);
+		var iToal = aBoxW * col;
+		var hArr = [];
+		oParent.style.cssText = 'width:' + iToal + 'px';
+
+		for(var i=0; i<oBox.length; i++){
+			if(i<col){
+				hArr.push(oBox[i].offsetHeight);
+			}else{
+				var iMin = Math.min.apply(null, hArr);
+				var index = getMinIndex(hArr, iMin);
+				oBox[i].style.position = 'absolute'
+				oBox[i].style.top = iMin + 'px';
+				oBox[i].style.left = index*aBoxW + 'px';
+				hArr[index]+=oBox[i].offsetHeight;
+			}
+		}
+	}
+	function getMinIndex(arr, val){
+		var index = 0;
+		for(var i in arr){
+			if(arr[i] == val){
+				index = i;
+			}
+		}
+		return index;
+	}
+	function getByClass(oParent, sClass){
+		var aEle=oParent.getElementsByTagName('*');
+		var aResult=[];
+		var i=0;
+		
+		for(i=0;i<aEle.length;i++)
+		{
+			if(aEle[i].className==sClass)
+			{
+				aResult.push(aEle[i]);
+			}
+		}
+		
+		return aResult;
+	}
+	function checkScroll(){
+		var oParent = document.getElementById('container');
+		var oBox = getByClass(oParent, 'box');
+		var lastBox =oBox[oBox.length - 1]
+		var lastBoxH = lastBox.offsetTop + Math.floor(lastBox.offsetHeight / 2);
+		var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+		var winHeight = document.documentElement.clientHeight || document.body.clientHeight;
+
+		return (lastBoxH < scrollTop + winHeight)?true:false;
+	}
+</script>
+</body>
+</html>
